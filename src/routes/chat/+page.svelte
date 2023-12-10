@@ -6,19 +6,21 @@
 
 	let messages = [];
 	let newMessage = '';
+	let isLoading = false;
+
 	const API_URL = 'http://localhost:8080'; // Replace with your actual API URL
 	let conversationId = uuidv4(); // Generate a UUID for the session. You'll need to import or define a uuidv4 function
 
 	async function sendMessage() {
 		if (newMessage.trim() === '') return;
 
-    // Add user's message immediately and clear input
-    messages = [...messages, { text: newMessage, sender: 'user' }];
-    let userInput = newMessage; // Store user input to use later
-    newMessage = '';
-
+		// Add user's message immediately and clear input
+		messages = [...messages, { text: newMessage, sender: 'user' }];
+		let userInput = newMessage; // Store user input to use later
+		newMessage = '';
 
 		try {
+      isLoading = true; // Start loading
 			const response = await fetch(`${API_URL}/chat`, {
 				method: 'POST',
 				headers: {
@@ -33,14 +35,16 @@
 			});
 
 			if (!response.ok) {
+        isLoading = false; // Stop loading after getting the response
 				throw new Error(`HTTP error! Status: ${response.status}`);
 			}
 
 			const data = await response.text(); // Get the response as text
 			messages = [...messages, { text: data, sender: 'bot' }];
+      isLoading = false; // Stop loading after getting the response
 		} catch (error) {
 			console.error('Fetch error:', error);
-			// Optionally, handle the error in your UI
+      isLoading = false; // Stop loading after getting the response
 		}
 	}
 
@@ -60,9 +64,12 @@
 	<div class="chat-history">
 		{#each messages as message}
 			<div class={`message ${message.sender || 'unknown'}`}>
-        {@html formatMessage(message.text)}
+				{@html formatMessage(message.text)}
 			</div>
 		{/each}
+		{#if isLoading}
+			<div class="loading">Loading...</div>
+		{/if}
 	</div>
 	<div class="message-input">
 		<textarea
@@ -122,5 +129,11 @@
 	}
 	button:hover {
 		background-color: darken(var(--color-theme-1), 10%);
+	}
+
+	.loading {
+		text-align: center;
+		padding: 10px;
+		/* Add more styles or animations here */
 	}
 </style>
