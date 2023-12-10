@@ -2,7 +2,7 @@
 	// @ts-nocheck
 
 	import { v4 as uuidv4 } from 'uuid';
-	import { formatMessage } from '../../helpers/text-helpers';
+	import { formatMessage } from '../helpers/text-helpers';
 
 	let messages = [];
 	let newMessage = '';
@@ -10,6 +10,14 @@
 
 	const API_URL = import.meta.env.VITE_API_URL;
 	let conversationId = uuidv4(); // Generate a UUID for the session. You'll need to import or define a uuidv4 function
+
+	function refreshChat() {
+		messages = []; // Clear existing messages
+		conversationId = uuidv4(); // Generate a new conversation ID
+
+		// Optional: Display a notification (You might need a notification system or a simple alert for this)
+		alert('Chat is refreshed'); // Using a simple alert for demonstration
+	}
 
 	async function sendMessage() {
 		if (newMessage.trim() === '') return;
@@ -20,7 +28,7 @@
 		newMessage = '';
 
 		try {
-      isLoading = true; // Start loading
+			isLoading = true; // Start loading
 			const response = await fetch(`${API_URL}/chat`, {
 				method: 'POST',
 				headers: {
@@ -35,16 +43,16 @@
 			});
 
 			if (!response.ok) {
-        isLoading = false; // Stop loading after getting the response
+				isLoading = false; // Stop loading after getting the response
 				throw new Error(`HTTP error! Status: ${response.status}`);
 			}
 
 			const data = await response.text(); // Get the response as text
 			messages = [...messages, { text: data, sender: 'bot' }];
-      isLoading = false; // Stop loading after getting the response
+			isLoading = false; // Stop loading after getting the response
 		} catch (error) {
 			console.error('Fetch error:', error);
-      isLoading = false; // Stop loading after getting the response
+			isLoading = false; // Stop loading after getting the response
 		}
 	}
 
@@ -61,6 +69,9 @@
 </script>
 
 <div class="chat-container">
+	<div class="refresh-button-container">
+		<button on:click={refreshChat}>New Session</button>
+	</div>
 	<div class="chat-history">
 		{#each messages as message}
 			<div class={`message ${message.sender || 'unknown'}`}>
@@ -129,6 +140,11 @@
 	}
 	button:hover {
 		background-color: darken(var(--color-theme-1), 10%);
+	}
+
+	.refresh-button-container {
+		text-align: right;
+		padding: 0.5rem;
 	}
 
 	.loading {
