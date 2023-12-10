@@ -12,6 +12,12 @@
 	async function sendMessage() {
 		if (newMessage.trim() === '') return;
 
+    // Add user's message immediately and clear input
+    messages = [...messages, { text: newMessage, sender: 'user' }];
+    let userInput = newMessage; // Store user input to use later
+    newMessage = '';
+
+
 		try {
 			const response = await fetch(`${API_URL}/chat`, {
 				method: 'POST',
@@ -22,7 +28,7 @@
 				body: JSON.stringify({
 					collection_name: 'external',
 					conversation_id: conversationId,
-					query: newMessage
+					query: userInput
 				})
 			});
 
@@ -31,8 +37,7 @@
 			}
 
 			const data = await response.text(); // Get the response as text
-			messages = [...messages, { text: newMessage, sender: 'user' }, { text: data, sender: 'bot' }];
-			newMessage = ''; // Clear the input field
+			messages = [...messages, { text: data, sender: 'bot' }];
 		} catch (error) {
 			console.error('Fetch error:', error);
 			// Optionally, handle the error in your UI
