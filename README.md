@@ -39,5 +39,5 @@ npm install
 npm run dev
 ```
 
-This will launch the app in your browser. If it doesn't automatically open, visit http://localhost:3456.
+This will launch the app in your browser. If it doesn't automatically open, visit http://localhost:3000.
 

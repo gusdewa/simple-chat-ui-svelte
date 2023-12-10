@@ -8,7 +8,7 @@
 	let newMessage = '';
 	let isLoading = false;
 
-	const API_URL = 'http://localhost:8080'; // Replace with your actual API URL
+	const API_URL = import.meta.env.VITE_API_URL;
 	let conversationId = uuidv4(); // Generate a UUID for the session. You'll need to import or define a uuidv4 function
 
 	async function sendMessage() {
