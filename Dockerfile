@@ -1,10 +1,9 @@
-# Base image
-FROM node:latest as build
+# Stage 1: Build the project
+FROM node:21-alpine AS build
 
-# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json (if available)
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
 # Install dependencies
@@ -13,20 +12,30 @@ RUN npm install
 # Copy project files
 COPY . .
 
-# Build the app
+# Build the project
 RUN npm run build
 
-# Final image
-FROM node:latest
+# Stage 2: Serve the app using Nginx
+FROM nginx:alpine
 
-WORKDIR /app
+# Set working directory to Nginx asset directory
+WORKDIR /usr/share/nginx/html
 
-# Copy build from the previous stage
-COPY --from=build /app/build ./build
-COPY --from=build /app/node_modules ./node_modules
+# Remove default Nginx static assets
+RUN rm -rf ./*
 
-# Expose the port the app runs on
-EXPOSE 3000
+# Copy static assets from builder stage
+COPY --from=build /app/build .
 
-# Start the app
-CMD ["node", "build"]
+# Copy custom Nginx configuration file
+COPY default.conf /etc/nginx/conf.d/default.conf
+
+# Change ownership and permissions of the files
+# This step ensures Nginx can read the files
+RUN chown nginx:nginx ./* && chmod -R 755 ./*
+
+# Expose port 80
+EXPOSE 80
+
+# Start Nginx and keep it running
+CMD ["nginx", "-g", "daemon off;"]
