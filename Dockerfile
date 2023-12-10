@@ -6,6 +6,8 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
+ENV VITE_API_URL=http://localhost:8080
+
 # Install dependencies
 RUN npm install
 
