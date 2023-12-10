@@ -1,6 +1,24 @@
 <script>
 	import Header from './Header.svelte';
 	import './styles.css';
+
+	let apiStatusMessage = '';
+	let isError = false;
+
+	async function checkApi() {
+		try {
+			const response = await fetch(`${import.meta.env.VITE_API_URL}/health`);
+			if (response.ok) {
+				apiStatusMessage = 'API is Ready';
+				isError = false;
+			} else {
+				throw new Error('API check failed');
+			}
+		} catch (error) {
+			apiStatusMessage = `API is NOT Ready. Please check: ${import.meta.env.VITE_API_URL}`;
+			isError = true;
+		}
+	}
 </script>
 
 <div class="app">
@@ -12,6 +30,8 @@
 
 	<footer>
 		<p>visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to learn SvelteKit</p>
+		<button on:click={checkApi}>Check API</button>
+		<p class:isError>{apiStatusMessage}</p>
 	</footer>
 </div>
 
@@ -49,5 +69,17 @@
 		footer {
 			padding: 12px 0;
 		}
+	}
+
+	/* Existing styles... */
+
+	.isError {
+		color: red;
+	}
+
+	button {
+		margin-top: 12px;
+		padding: 8px 16px;
+		/* Add more button styles as needed */
 	}
 </style>
